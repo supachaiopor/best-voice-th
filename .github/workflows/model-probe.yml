@@ -1,0 +1,29 @@
+name: Probe Thai model
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - tools/model_probe.py
+      - .github/workflows/model-probe.yml
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install CPU runtime
+        run: python -m pip install torch==2.3.0 torchaudio==2.3.0 --index-url https://download.pytorch.org/whl/cpu
+      - name: Install Thai engine
+        run: python -m pip install f5-tts-th
+      - name: Initialize and inspect model
+        run: python tools/model_probe.py
+      - name: Upload model inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: thai-model-probe
+          path: model_probe.json
