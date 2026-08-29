@@ -1,0 +1,86 @@
+name: Build BEST Voice TH Portable
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install model export environment
+        run: |
+          python -m pip install "numpy==1.26.4"
+          python -m pip install torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install f5-tts-th
+          git clone --depth 1 https://github.com/DakeQQ/F5-TTS-ONNX.git build_work/F5-TTS-ONNX
+          python -m pip install -r build_work/F5-TTS-ONNX/Export_ONNX/F5_TTS/requirements.txt
+          python -m pip install "numpy==1.26.4"
+
+      - name: Export Thai model to ONNX
+        run: python tools/export_thai_onnx.py
+
+      - name: Install portable runtime
+        run: |
+          python -m pip uninstall -y onnxruntime onnxruntime-gpu onnxruntime-directml
+          python -m pip install "numpy==1.26.4" onnxruntime-directml customtkinter pyinstaller soundfile pydub pypinyin jieba rjieba
+
+      - name: Download public Thai reference for smoke test
+        shell: pwsh
+        run: Invoke-WebRequest "https://huggingface.co/VIZINTZOR/F5-TTS-THAI/resolve/main/sample/ref_audio.wav" -OutFile "smoke_ref.wav"
+
+      - name: Smoke test actual Thai WAV generation
+        shell: pwsh
+        run: |
+          python vendor/Inference_F5_TTS_ONNX.py --onnx-folder onnx_models --vocab-path onnx_models/vocab.txt --ref-audio smoke_ref.wav --ref-text "ฉันเดินทางไปเที่ยวที่จังหวัดเชียงใหม่ในช่วงฤดูหนาวเพื่อสัมผัสอากาศเย็นสบาย" --gen-text "สวัสดีครับ นี่คือการทดสอบโปรแกรมเบสท์วอยซ์ภาษาไทย" --speed 0.9 --force-nfe 8 --ort-provider CPUExecutionProvider --output-path smoke_thai.wav
+          python -c "import soundfile as sf, pathlib; y,sr=sf.read('smoke_thai.wav'); assert sr==24000 and len(y)>12000 and pathlib.Path('smoke_thai.wav').stat().st_size>24000; print('SMOKE PASS',len(y)/sr,'seconds')"
+
+      - name: Build Windows application
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onedir --windowed --name BestVoiceTH --collect-all customtkinter --collect-all onnxruntime --hidden-import onnxruntime.capi._pybind_state --hidden-import soundfile --hidden-import pydub --hidden-import pypinyin --hidden-import jieba --hidden-import rjieba --add-data "vendor;vendor" app.py
+          New-Item -ItemType Directory -Force "dist/BestVoiceTH/models" | Out-Null
+          Copy-Item "onnx_models/*" "dist/BestVoiceTH/models/" -Force
+          Copy-Item "THIRD_PARTY_NOTICES.txt" "dist/BestVoiceTH/" -Force
+          Set-Content -Path "dist/BestVoiceTH/เปิดโปรแกรม BEST Voice TH.bat" -Encoding utf8 -Value '@echo off','chcp 65001 >nul','cd /d "%~dp0"','start "" "BestVoiceTH.exe"'
+
+      - name: Portable package verification
+        shell: pwsh
+        run: |
+          $required = @(
+            "dist/BestVoiceTH/BestVoiceTH.exe",
+            "dist/BestVoiceTH/models/F5_Preprocess.onnx",
+            "dist/BestVoiceTH/models/F5_Transformer.onnx",
+            "dist/BestVoiceTH/models/F5_Decode.onnx",
+            "dist/BestVoiceTH/models/F5_Metadata.onnx",
+            "dist/BestVoiceTH/models/vocab.txt",
+            "dist/BestVoiceTH/vendor/Inference_F5_TTS_ONNX.py"
+          )
+          foreach ($path in $required) {
+            if (-not (Test-Path $path)) { throw "Portable package missing $path" }
+            Write-Host "$path $((Get-Item $path).Length) bytes"
+          }
+          Copy-Item smoke_thai.wav "dist/BestVoiceTH/ตัวอย่างผลทดสอบ.wav"
+          7z a -tzip -mx=1 "BEST_Voice_TH_Portable_v0.1.zip" ".\dist\BestVoiceTH\*"
+          if ((Get-Item "BEST_Voice_TH_Portable_v0.1.zip").Length -lt 100MB) { throw "Portable ZIP is unexpectedly small" }
+
+      - name: Upload tested portable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: BEST-Voice-TH-Portable-v0.1
+          path: BEST_Voice_TH_Portable_v0.1.zip
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload smoke-test WAV
+        uses: actions/upload-artifact@v4
+        with:
+          name: BEST-Voice-TH-smoke-test
+          path: smoke_thai.wav
+          compression-level: 0
+          retention-days: 7
