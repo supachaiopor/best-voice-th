@@ -65,7 +65,7 @@ jobs:
             "dist/BestVoiceTH/models/F5_Decode.onnx",
             "dist/BestVoiceTH/models/F5_Metadata.onnx",
             "dist/BestVoiceTH/models/vocab.txt",
-            "dist/BestVoiceTH/vendor/Inference_F5_TTS_ONNX.py"
+            "dist/BestVoiceTH/_internal/vendor/Inference_F5_TTS_ONNX.py"
           )
           foreach ($path in $required) {
             if (-not (Test-Path $path)) { throw "Portable package missing $path" }
