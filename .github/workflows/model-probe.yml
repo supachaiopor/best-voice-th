@@ -5,6 +5,10 @@ on:
     paths:
       - tools/model_probe.py
       - .github/workflows/model-probe.yml
+
+permissions:
+  contents: write
+
 jobs:
   probe:
     runs-on: windows-latest
@@ -21,6 +25,17 @@ jobs:
         run: python -m pip install f5-tts-th
       - name: Initialize and inspect model
         run: python tools/model_probe.py
+      - name: Save model inventory to repository
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add model_probe.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "chore: save Thai model inventory [skip ci]"
+            git push
+          }
       - name: Upload model inventory
         if: always()
         uses: actions/upload-artifact@v4
