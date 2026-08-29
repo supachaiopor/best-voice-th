@@ -1,0 +1,29 @@
+{
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+  "home": "C:\\Users\\runneradmin",
+  "files": [
+    {
+      "path": "C:\\Users\\runneradmin\\.cache\\huggingface\\hub\\models--charactr--vocos-mel-24khz\\snapshots\\0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21\\config.yaml",
+      "size": 461
+    },
+    {
+      "path": "C:\\Users\\runneradmin\\.cache\\huggingface\\hub\\models--VIZINTZOR--F5-TTS-THAI\\snapshots\\af023c707f4208e5fc1fce59c1fd1501cfc3fc22\\model_1000000.pt",
+      "size": 1348642003
+    },
+    {
+      "path": "C:\\Users\\runneradmin\\.cache\\huggingface\\hub\\models--VIZINTZOR--F5-TTS-THAI\\snapshots\\af023c707f4208e5fc1fce59c1fd1501cfc3fc22\\vocab.txt",
+      "size": 11419
+    },
+    {
+      "path": "D:\\a\\best-voice-th\\best-voice-th\\.github\\workflows\\model-probe.yml",
+      "size": 1361
+    }
+  ],
+  "tts_import": "ok",
+  "tts_init": "ok",
+  "tts_type": "<class 'f5_tts_th.tts.TTS'>",
+  "tts_attrs": {
+    "model_type": "v1",
+    "vocoder_name": "vocos"
+  }
+}
