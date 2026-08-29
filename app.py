@@ -3,7 +3,7 @@ import json, os, runpy, shutil, subprocess, sys, threading, time, wave
 from datetime import datetime
 from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 import customtkinter as ctk
 
 ROOT=Path(getattr(sys,"_MEIPASS",Path(__file__).resolve().parent))
@@ -77,7 +77,7 @@ class App(ctk.CTk):
     def add_voice(self):
         audio=filedialog.askopenfilename(title="เลือกเสียงต้นแบบ",filetypes=[("Audio","*.wav *.mp3 *.flac *.m4a")])
         if not audio:return
-        name=tk.simpledialog.askstring("ชื่อเสียง","ตั้งชื่อเสียงนี้:",parent=self)
+        name=simpledialog.askstring("ชื่อเสียง","ตั้งชื่อเสียงนี้:",parent=self)
         if not name:return
         dst=VOICES/(datetime.now().strftime("%Y%m%d_%H%M%S")+"_"+Path(audio).name); shutil.copy2(audio,dst)
         self.profiles.append({"name":name.strip(),"audio":str(dst),"text":""}); self.save_profiles(); self.refresh_profiles()
