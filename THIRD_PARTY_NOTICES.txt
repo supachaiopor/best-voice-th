@@ -1,0 +1,26 @@
+BEST Voice TH — Third-Party Notices
+
+Thai voice model
+- VIZINTZOR/F5-TTS-THAI
+- Source: https://huggingface.co/VIZINTZOR/F5-TTS-THAI
+- License shown by the model repository: Creative Commons Attribution 4.0 (CC BY 4.0)
+- This distribution uses an ONNX conversion of model_1000000.pt and vocab.txt.
+- Changes: converted from PyTorch checkpoint format to ONNX for local inference.
+
+F5-TTS
+- SWivid/F5-TTS
+- Source: https://github.com/SWivid/F5-TTS
+- License: MIT
+
+F5-TTS ONNX conversion/runtime
+- DakeQQ/F5-TTS-ONNX
+- Source: https://github.com/DakeQQ/F5-TTS-ONNX
+- License: Apache License 2.0
+- Changes: added command-line reference audio, transcript, generation text, and speed parameters.
+
+Vocos
+- charactr/vocos-mel-24khz
+- Source: https://huggingface.co/charactr/vocos-mel-24khz
+
+Use voice cloning only with the speaker's permission. Do not use it to impersonate, defraud,
+harass, or mislead people. The user is responsible for generated audio and applicable law.
